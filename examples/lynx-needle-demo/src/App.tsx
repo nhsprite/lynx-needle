@@ -177,9 +177,12 @@ export function App() {
 
   const push = useCallback((entry: Entry) => {
     setEntries((prev) => {
-      // Remember where the new conversation turn starts so the log can
-      // scroll it into view.
-      if (entry.kind === 'user') scrollTargetRef.current = prev.length
+      // Remember where the new content starts so the log can scroll it into
+      // view. For agent turns the 'user' entry marks the turn start (the
+      // response card follows below); extract/error cards stand alone.
+      if (entry.kind === 'user' || entry.kind === 'extract') {
+        scrollTargetRef.current = prev.length
+      }
       return [...prev, entry]
     })
   }, [])
