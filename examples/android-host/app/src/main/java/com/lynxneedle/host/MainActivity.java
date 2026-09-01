@@ -93,7 +93,8 @@ public class MainActivity extends ComponentActivity {
     options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
     options.setPrompt("Point at the QR code shown by `npm run dev`");
     options.setBeepEnabled(false);
-    options.setOrientationLocked(true);
+    options.setOrientationLocked(false);
+    options.setCaptureActivity(PortraitCaptureActivity.class);
     scanLauncher.launch(options);
   }
 
