@@ -9,12 +9,14 @@
 
     <application
         android:name=".HostApplication"
+        android:icon="@mipmap/ic_launcher"
         android:label="Needle Host"
         android:usesCleartextTraffic="true"
         android:theme="@android:style/Theme.Material.NoActionBar">
         <activity
             android:name=".PortraitCaptureActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/zxing_CaptureTheme" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -1,12 +1,14 @@
 package com.lynxneedle.host;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.activity.ComponentActivity;
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
@@ -21,11 +23,11 @@ import java.util.HashMap;
 /**
  * Minimal host: scan the QR code printed by the Rspeedy dev server
  * (`npm run dev` in examples/lynx-needle-demo) to load the Lynx page.
+ * Pressing back while a page is loaded returns to the scan state.
  */
 public class MainActivity extends ComponentActivity {
   private ViewGroup container;
   private View emptyState;
-  private View rescanButton;
   private LynxView lynxView;
 
   private final ActivityResultLauncher<ScanOptions> scanLauncher =
@@ -56,22 +58,35 @@ public class MainActivity extends ComponentActivity {
 
     container = findViewById(R.id.lynx_container);
     emptyState = findViewById(R.id.empty_state);
-    rescanButton = findViewById(R.id.rescan_button);
-
     findViewById(R.id.scan_button).setOnClickListener(v -> maybeStartScan());
-    rescanButton.setOnClickListener(v -> maybeStartScan());
+
+    // Back with a page loaded = unload and return to the scan state.
+    getOnBackPressedDispatcher()
+        .addCallback(
+            this,
+            new OnBackPressedCallback(true) {
+              @Override
+              public void handleOnBackPressed() {
+                if (lynxView != null) {
+                  unload();
+                } else {
+                  setEnabled(false);
+                  getOnBackPressedDispatcher().onBackPressed();
+                }
+              }
+            });
 
     // Automation hook: `am start -n com.lynxneedle.host/.MainActivity --es url <bundle-url>`
     handleIntentUrl(getIntent());
   }
 
   @Override
-  protected void onNewIntent(android.content.Intent intent) {
+  protected void onNewIntent(Intent intent) {
     super.onNewIntent(intent);
     handleIntentUrl(intent);
   }
 
-  private void handleIntentUrl(android.content.Intent intent) {
+  private void handleIntentUrl(Intent intent) {
     if (intent == null) return;
     String url = intent.getStringExtra("url");
     if (url != null && !url.isEmpty()) {
@@ -91,7 +106,6 @@ public class MainActivity extends ComponentActivity {
   private void startScan() {
     ScanOptions options = new ScanOptions();
     options.setDesiredBarcodeFormats(ScanOptions.QR_CODE);
-    options.setPrompt("Point at the QR code shown by `npm run dev`");
     options.setBeepEnabled(false);
     options.setOrientationLocked(false);
     options.setCaptureActivity(PortraitCaptureActivity.class);
@@ -99,19 +113,21 @@ public class MainActivity extends ComponentActivity {
   }
 
   private void load(String url) {
+    unload();
+    lynxView = new LynxViewBuilder().build(this);
+    LynxNeedle.attach(lynxView);
+    container.addView(lynxView);
+    lynxView.renderTemplateUrl(url, TemplateData.fromMap(new HashMap<>()));
+    emptyState.setVisibility(View.GONE);
+  }
+
+  private void unload() {
     if (lynxView != null) {
       container.removeView(lynxView);
       lynxView.destroy();
       lynxView = null;
     }
-
-    lynxView = new LynxViewBuilder().build(this);
-    LynxNeedle.attach(lynxView);
-    container.addView(lynxView);
-    lynxView.renderTemplateUrl(url, TemplateData.fromMap(new HashMap<>()));
-
-    emptyState.setVisibility(View.GONE);
-    rescanButton.setVisibility(View.VISIBLE);
+    emptyState.setVisibility(View.VISIBLE);
   }
 
   @Override
