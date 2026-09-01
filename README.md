@@ -10,6 +10,14 @@ RAM and no network.
 Lynx page JS ──▶ needle NAPI addon (this repo) ──▶ libneedle.a (engine, weights baked in)
 ```
 
+## Screenshots
+
+Running on a real Android device (Lynx 4.3.0 nightly, no network):
+
+| Welcome & capabilities | Tool-calling turn | Structured extraction |
+| --- | --- | --- |
+| ![welcome](docs/screenshots/demo-welcome.png) | ![tool call](docs/screenshots/demo-tool-call.png) | ![extraction](docs/screenshots/demo-extraction.png) |
+
 ## What the model does
 
 Tool calling and structured extraction. You declare JSON-Schema tools, the
