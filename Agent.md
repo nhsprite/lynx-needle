@@ -14,16 +14,21 @@ on-device tool-calling model) into Lynx pages on Android and iOS. Deliverables:
 The native addon is built by one cross-platform CMakeLists.txt with branches
 for Android, iOS, HarmonyOS, and macOS.
 
-## Critical constraint: NAPI needs a source-built Lynx runtime
+## Critical constraint: NAPI needs Lynx ≥ 4.3.0 (nightly) or a source build
 
-The `requireNodeAddon` / `__lynx_node_addon_exports__` flow is **not compiled
-into published SDK binaries** — every Maven `liblynx.so` (3.9.x, 4.0.x, all
-nightlies) is built with `enable_napi_binding=false`, and the published iOS
-pod has the macro on but fails to compile (missing `third_party/napi/include/*`
-headers). Only a Lynx runtime built from source with
-`enable_napi_binding=true enable_lepusng_worklet=true` (the gn args LynxExplorer
-passes, see `explorer/android/gradle.properties` in lynx-family/lynx) can load
-the addon. Against stock binaries, `loadNeedle()` returns `null` by design.
+The `requireNodeAddon` / `__lynx_node_addon_exports__` flow requires a runtime
+built with `enable_napi_binding=true`. The **4.3.0 nightly snapshots** on the
+Maven Central snapshot repository
+(`https://central.sonatype.com/repository/maven-snapshots/`) are the first
+published artifacts with it (device-verified with
+`4.3.0-nightly.202609010611.167.g17ad2906-SNAPSHOT`); every release-repo
+binary (3.9.x, 4.0.x, 4.1.0 nightlies) has it compiled out. The iOS pod still
+does not work (macro on, but `third_party/napi/include/*` headers missing from
+the pod). A source build must pass
+`enable_napi_binding=true enable_lepusng_worklet=true` (the gn args
+LynxExplorer passes). Note the two-arg
+`onRuntimeAttach(long napiEnv, String runtimeType)` listener signature on 4.3.0.
+Against a runtime without NAPI binding, `loadNeedle()` returns `null` by design.
 
 ## Quick start
 

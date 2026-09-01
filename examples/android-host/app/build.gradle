@@ -33,9 +33,11 @@ android {
 
 dependencies {
     implementation project(':lynx-needle-sdk')
-    implementation 'org.lynxsdk.lynx:lynx:3.9.1'
-    implementation 'org.lynxsdk.lynx:lynx-service-log:3.9.1'
-    implementation 'org.lynxsdk.lynx:lynx-service-http:3.9.1'
+    // 4.3.0 nightly: the first published Lynx build with NAPI binding enabled
+    // (verified: NapiRuntimeProxy + attach logs present in liblynx.so).
+    implementation 'org.lynxsdk.lynx:lynx:4.3.0-nightly.202609010611.167.g17ad2906-SNAPSHOT'
+    implementation 'org.lynxsdk.lynx:lynx-service-log:4.3.0-nightly.202609010611.167.g17ad2906-SNAPSHOT'
+    implementation 'org.lynxsdk.lynx:lynx-service-http:4.3.0-nightly.202609010611.167.g17ad2906-SNAPSHOT'
     // lynx-service-http declares okhttp as compileOnly
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'androidx.annotation:annotation:1.9.1'

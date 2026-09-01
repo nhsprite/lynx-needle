@@ -16,8 +16,8 @@ import com.lynx.tasm.LynxView;
  *   LynxNeedle.attach(lynxView);
  * </pre>
  *
- * Requires a Lynx runtime built with enable_napi_binding=true; the published
- * Maven SDK binaries do not include it (onRuntimeAttach never fires there).
+ * Requires a Lynx runtime with NAPI binding (e.g. the 4.3.0 nightly
+ * snapshots; older published binaries never fire onRuntimeAttach).
  */
 public final class LynxNeedle {
   private LynxNeedle() {}
@@ -35,7 +35,7 @@ public final class LynxNeedle {
   public static void attach(final LynxView lynxView) {
     lynxView.addRuntimeLifecycleListener(new RuntimeLifecycleListener() {
       @Override
-      public void onRuntimeAttach(long napiEnv) {
+      public void onRuntimeAttach(long napiEnv, String runtimeType) {
         LynxNodeAPIModule.putEnv(lynxView.getLynxContext(), napiEnv);
       }
 

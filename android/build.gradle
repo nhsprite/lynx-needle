@@ -30,5 +30,8 @@ android {
 
 dependencies {
     // The host app provides the Lynx runtime at whatever version it chooses.
-    compileOnly 'org.lynxsdk.lynx:lynx:3.9.1'
+    // The NAPI addon flow requires a runtime with NAPI binding; the first such
+    // published artifacts are the 4.3.0 nightlies (RuntimeLifecycleListener's
+    // onRuntimeAttach(long, String) two-arg signature matches those).
+    compileOnly 'org.lynxsdk.lynx:lynx:4.3.0-nightly.202609010611.167.g17ad2906-SNAPSHOT'
 }

@@ -14,9 +14,10 @@ the `needle` NAPI addon:
 
 - Host app already integrates a Lynx runtime (`org.lynxsdk.lynx:lynx`).
   The SDK declares it `compileOnly`; the host picks the version.
-- **NAPI requires a source-built Lynx runtime** — the published Maven
-  binaries compile out `enable_napi_binding`, so `onRuntimeAttach` never
-  fires. See the repo-root README for details.
+- **NAPI requires Lynx ≥ 4.3.0 nightly** (the first published binaries with
+  `enable_napi_binding`; on the Maven Central snapshot repo) or a source-built
+  runtime. Older release-repo binaries never fire `onRuntimeAttach`. See the
+  repo-root README for details.
 - Repo root: `npm install && npm run fetch-engine && npm run build:android`
   (builds straight into the module's jniLibs).
 

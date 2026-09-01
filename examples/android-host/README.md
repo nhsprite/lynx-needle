@@ -33,10 +33,12 @@ Open "Needle Host", enter the demo bundle URL
 
 ## Notes
 
-- **The published Maven Lynx SDK binaries do not include NAPI binding** —
-  with stock `liblynx.so` the page renders but reports "addon not available"
-  (`onRuntimeAttach` never fires). Replace `liblynx.so` with a source-built
-  one (`enable_napi_binding=true`, the source default) to see the full flow;
+- **The example pins the 4.3.0 nightly snapshot**, the first published Lynx
+  build with NAPI binding (fetched from the Maven Central snapshot repository
+  declared in `settings.gradle`). Older release-repo binaries compile it out —
+  there the page renders but reports "addon not available"
+  (`onRuntimeAttach` never fires). A source-built `liblynx.so`
+  (`enable_napi_binding=true enable_lepusng_worklet=true`) also works;
   `packagingOptions.pickFirst '**/liblynx.so'` in `app/build.gradle` already
   prefers a copy dropped into `app/src/main/jniLibs/<abi>/`.
 - The app ships only `arm64-v8a`; the SDK module itself builds both
