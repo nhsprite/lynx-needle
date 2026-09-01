@@ -14,7 +14,7 @@ import './App.css'
 type Entry =
   | { kind: 'user'; text: string }
   | { kind: 'turn'; response: NeedleRunResult }
-  | { kind: 'extract'; input: string; output: Record<string, unknown> | null }
+  | { kind: 'extract'; output: Record<string, unknown> | null }
   | { kind: 'error'; text: string }
 
 const CAPABILITIES = [
@@ -97,13 +97,7 @@ function TurnCard({ response }: { response: NeedleRunResult }) {
   )
 }
 
-function ExtractCard({
-  input,
-  output,
-}: {
-  input: string
-  output: Record<string, unknown> | null
-}) {
+function ExtractCard({ output }: { output: Record<string, unknown> | null }) {
   return (
     <view className="card card-extract" flatten={false}>
       <view className="card-head">
@@ -111,7 +105,6 @@ function ExtractCard({
           <text className="pill-text">📄 extraction</text>
         </view>
       </view>
-      <text className="extract-input">{input}</text>
       <view className="kv-table">
         {output === null ? (
           <text className="dim">no structured output</text>
@@ -174,15 +167,14 @@ export function App() {
 
   const logRef = useRef<any>(null)
   const scrollTargetRef = useRef<number | null>(null)
+  // setBusy is async; a ref closes the double-tap window.
+  const busyRef = useRef(false)
 
   const push = useCallback((entry: Entry) => {
     setEntries((prev) => {
-      // Remember where the new content starts so the log can scroll it into
-      // view. For agent turns the 'user' entry marks the turn start (the
-      // response card follows below); extract/error cards stand alone.
-      if (entry.kind === 'user' || entry.kind === 'extract') {
-        scrollTargetRef.current = prev.length
-      }
+      // The 'user' entry marks the start of a turn (extract turns included);
+      // scroll targets it so the response/extract card follows below.
+      if (entry.kind === 'user') scrollTargetRef.current = prev.length
       return [...prev, entry]
     })
   }, [])
@@ -203,7 +195,8 @@ export function App() {
   const ask = useCallback(
     async (query: string) => {
       const agent = needleRef.current
-      if (!agent || busy || !query.trim()) return
+      if (!agent || busy || busyRef.current || !query.trim()) return
+      busyRef.current = true
       setBusy(true)
       push({ kind: 'user', text: query })
       setDraft('')
@@ -213,6 +206,7 @@ export function App() {
       } catch (err) {
         push({ kind: 'error', text: String(err instanceof Error ? err.message : err) })
       } finally {
+        busyRef.current = false
         setBusy(false)
       }
     },
@@ -221,16 +215,21 @@ export function App() {
 
   const runExtract = useCallback(async () => {
     const agent = needleRef.current
-    if (!agent || busy) return
+    if (!agent || busy || busyRef.current) return
+    busyRef.current = true
     setBusy(true)
     try {
+      // Show the input as a user bubble so extraction follows the same
+      // conversation pattern as tool-calling turns.
+      push({ kind: 'user', text: `extract: ${EXTRACT_DEMO_TEXT}` })
       const output = await agent.extract(EXTRACT_DEMO_TEXT, EXTRACT_DEMO_SCHEMA)
-      push({ kind: 'extract', input: EXTRACT_DEMO_TEXT, output })
+      push({ kind: 'extract', output })
       // extract() re-inits the session with a single tool; restore the demo set.
       agent.init(DEMO_SYSTEM, DEMO_TOOLS)
     } catch (err) {
       push({ kind: 'error', text: String(err instanceof Error ? err.message : err) })
     } finally {
+      busyRef.current = false
       setBusy(false)
     }
   }, [busy, push])
@@ -299,7 +298,7 @@ export function App() {
             return <TurnCard key={i} response={entry.response} />
           }
           if (entry.kind === 'extract') {
-            return <ExtractCard key={i} input={entry.input} output={entry.output} />
+            return <ExtractCard key={i} output={entry.output} />
           }
           return (
             <view key={i} className="card" flatten={false}>
