@@ -58,7 +58,7 @@ function TypePill({ response }: { response: NeedleRunResult }) {
 
 function TurnCard({ response }: { response: NeedleRunResult }) {
   return (
-    <view className="card">
+    <view className="card" flatten={false}>
       <view className="card-head">
         <TypePill response={response} />
         <ConfidencePill value={response.confidence} />
@@ -105,7 +105,7 @@ function ExtractCard({
   output: Record<string, unknown> | null
 }) {
   return (
-    <view className="card card-extract">
+    <view className="card card-extract" flatten={false}>
       <view className="card-head">
         <view className="pill pill-extract">
           <text className="pill-text">📄 extraction</text>
@@ -130,7 +130,7 @@ function ExtractCard({
 
 function Welcome() {
   return (
-    <view className="welcome">
+    <view className="welcome" flatten={false}>
       <text className="welcome-title">Talk to your phone.{'\n'}It calls the tools.</text>
       <text className="welcome-sub">
         A 45M-parameter, 2-bit model running entirely on this device. Declare
@@ -172,9 +172,30 @@ export function App() {
     })
   }, [])
 
+  const logRef = useRef<any>(null)
+  const scrollTargetRef = useRef<number | null>(null)
+
   const push = useCallback((entry: Entry) => {
-    setEntries((prev) => [...prev, entry])
+    setEntries((prev) => {
+      // Remember where the new conversation turn starts so the log can
+      // scroll it into view.
+      if (entry.kind === 'user') scrollTargetRef.current = prev.length
+      return [...prev, entry]
+    })
   }, [])
+
+  // Scroll the log so the start of the latest turn is visible.
+  useEffect(() => {
+    if (entries.length === 0) return
+    const target = scrollTargetRef.current
+    const index = target ?? entries.length - 1
+    const t = setTimeout(() => {
+      logRef.current
+        ?.invoke({ method: 'scrollTo', params: { index, offset: 0, smooth: true } })
+        .exec()
+    }, 80)
+    return () => clearTimeout(t)
+  }, [entries, busy])
 
   const ask = useCallback(
     async (query: string) => {
@@ -261,12 +282,12 @@ export function App() {
         </view>
       </view>
 
-      <scroll-view className="log" scroll-orientation="vertical">
+      <scroll-view ref={logRef} className="log" scroll-orientation="vertical">
         {entries.length === 0 && !busy ? <Welcome /> : null}
         {entries.map((entry, i) => {
           if (entry.kind === 'user') {
             return (
-              <view key={i} className="user-bubble">
+              <view key={i} className="user-bubble" flatten={false}>
                 <text className="user-text">{entry.text}</text>
               </view>
             )
@@ -278,13 +299,13 @@ export function App() {
             return <ExtractCard key={i} input={entry.input} output={entry.output} />
           }
           return (
-            <view key={i} className="card">
+            <view key={i} className="card" flatten={false}>
               <text className="error">{entry.text}</text>
             </view>
           )
         })}
         {busy && (
-          <view className="thinking">
+          <view className="thinking" flatten={false}>
             <text className="thinking-text">● ● ● on-device inference…</text>
           </view>
         )}
