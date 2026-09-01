@@ -239,7 +239,7 @@ cd examples/lynx-needle-demo && npm install && npm run dev   # e.g. :3000/main.l
 cd ../../examples/android-host
 ./gradlew :app:assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
-# Open "Needle Host", enter the bundle URL, GO.
+# Open "Needle Host" and scan the QR code from step 2.
 ```
 
 The example already pins the 4.3.0 nightly snapshot (NAPI-enabled), so the

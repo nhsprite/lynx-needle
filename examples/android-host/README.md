@@ -18,16 +18,17 @@ cd examples/android-host
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
-Open "Needle Host", enter the demo bundle URL
-(`http://<your-ip>:3000/main.lynx.bundle` from `npm run dev` in
-`examples/lynx-needle-demo`) and tap GO.
+Open "Needle Host" and scan the QR code printed by `npm run dev` in
+`examples/lynx-needle-demo`. To reload, tap "↻ scan" in the top bar.
+(Automation hook: `am start -n com.lynxneedle.host/.MainActivity --es url
+http://<your-ip>:3000/main.lynx.bundle` loads a bundle without scanning.)
 
 ## How it works
 
 - `HostApplication` — registers Lynx log/http services, `LynxEnv.init`, then
   `LynxNeedle.registerModule()` (from `android/`)
-- `MainActivity` — builds a `LynxView`, calls `LynxNeedle.attach(lynxView)`,
-  renders the URL from the editable input field
+- `MainActivity` — scans the dev-server QR code (zxing), builds a `LynxView`,
+  calls `LynxNeedle.attach(lynxView)`, renders the scanned bundle URL
 - All NAPI loader plumbing (module, JNI, native loader, jniLibs) lives in the
   `android/` library module
 

@@ -102,14 +102,15 @@ export const DEMO_HANDLERS: Record<string, NeedleToolHandler> = {
   send_message: ({ to, text }) => ({ to, text, sent: true }),
 }
 
-export const PRESET_QUERIES = [
-  'dim the living room to 30',
-  "what's the weather in Lagos?",
-  'play some jazz on the kitchen speaker',
-  'set the thermostat to 22 degrees',
-  'remind me to water the plants at 6pm',
-  'text Maya: dinner is ready',
-  'tell me a joke', // off-topic: the model should refuse
+export const PRESET_QUERIES: { icon: string; text: string }[] = [
+  { icon: '💡', text: 'dim the living room to 30' },
+  { icon: '🌤', text: "what's the weather in Lagos?" },
+  { icon: '🎵', text: 'play some jazz on the kitchen speaker' },
+  { icon: '🌡', text: 'set the thermostat to 22 degrees' },
+  { icon: '⏰', text: 'remind me to water the plants at 6pm' },
+  { icon: '✉️', text: 'text Maya: dinner is ready' },
+  // off-topic: the model should refuse with an empty function_calls
+  { icon: '🚫', text: 'tell me a joke' },
 ]
 
 export const EXTRACT_DEMO_TEXT =

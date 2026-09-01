@@ -2,34 +2,90 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#0B0D12"
     android:orientation="vertical">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp">
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="8dp">
 
-        <EditText
-            android:id="@+id/url_input"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="bundle url"
-            android:singleLine="true"
-            android:textSize="12sp" />
-
-        <Button
-            android:id="@+id/go_button"
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Go" />
-    </LinearLayout>
+            android:layout_gravity="center_vertical"
+            android:text="Needle Host"
+            android:textColor="#8A8F99"
+            android:textSize="13sp" />
+
+        <Button
+            android:id="@+id/rescan_button"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_gravity="end|center_vertical"
+            android:background="@drawable/fab_button"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:text="↻ scan"
+            android:textAllCaps="false"
+            android:textColor="#E5E7EB"
+            android:textSize="13sp"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <FrameLayout
-        android:id="@+id/lynx_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1">
+
+        <FrameLayout
+            android:id="@+id/lynx_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:id="@+id/empty_state"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="32dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Needle Host"
+                android:textColor="#F2F4F8"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="Scan the QR code printed by the Rspeedy dev server to load a Lynx page"
+                android:textColor="#8A8F99"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/scan_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:background="@drawable/accent_button"
+                android:paddingStart="28dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="28dp"
+                android:paddingBottom="14dp"
+                android:text="Scan QR code"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>
