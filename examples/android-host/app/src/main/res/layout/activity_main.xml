@@ -28,7 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Needle Host"
+            android:text="Lynx Needle"
             android:textColor="#F2F4F8"
             android:textSize="28sp"
             android:textStyle="bold" />
