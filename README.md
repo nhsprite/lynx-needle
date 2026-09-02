@@ -340,7 +340,7 @@ npm run build:macos     # → build/macos/out/libneedle.a
 
 ## License
 
-Apache-2.0. Engine binaries are distributed by Cactus Compute under the
+MIT. Engine binaries are distributed by Cactus Compute under the
 needle project's license; the NAPI scaffolding is from
 `@lynx-js/weak-node-api`. `cpp/LynxNodeAPI.{h,cc}` and `ios/Loader/` contain code
 vendored from `lynx-family/lynx` (Apache-2.0).
