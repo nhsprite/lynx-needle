@@ -13,6 +13,8 @@
 // The wrapper adds the agent loop (run) and one-shot extraction (extract),
 // mirroring the Python `cactus-needle` API.
 
+import { requireNeedle } from "./generated/Needle.js";
+
 /** JSON-Schema-flavored tool declaration consumed by the engine. */
 export interface NeedleTool {
   name: string;
@@ -52,7 +54,7 @@ export interface NeedleResponse {
   validation?: { ungrounded: string[]; negation: boolean };
 }
 
-/** Raw exports of the native addon (`__lynx_node_addon_exports__.needle`). */
+/** Raw exports of the native addon loaded by the generated AutoLink facade. */
 export interface NeedleAddon {
   /**
    * (Re)initialize the global session. `tools` may be a schema array or a
@@ -106,60 +108,26 @@ export interface NeedleAgent extends NeedleAddon {
   ): Promise<Record<string, unknown> | null>;
 }
 
-/** Lynx NAPI addon globals published by the host-side loader. */
-declare global {
-  // eslint-disable-next-line no-var
-  var __lynx_node_addon_exports__: Record<string, unknown> | undefined;
-}
-
-// Lynx injects `NativeModules` as a bundle-scope identifier (an AMD factory
-// parameter), NOT as a real global — it must be referenced as a bare
-// identifier with a `typeof` guard, never via globalThis.
-declare const NativeModules:
-  | { LynxNodeAPI?: { requireNodeAddon(name: string): void } }
-  | undefined;
-
-// The Lynx JS runtime provides these; they are not part of lib.es2017.
+// The Lynx JS runtime provides this; it is not part of lib.es2017.
 declare const console: { error(...args: unknown[]): void };
-declare function setTimeout(cb: (...args: never[]) => void, ms: number): unknown;
 
 /**
- * Load the addon through the Lynx host bridge and wrap it. Returns null when
- * the addon is not available (host not integrated / NAPI not enabled).
- *
- * The bridge call is async fire-and-forget, so we poll for the exports
- * object that the native loader publishes on globalThis.
+ * Load the addon through the Lynx AutoLink NAPI loader and wrap it. Returns
+ * null when the addon is not available (host not integrated / NAPI not enabled).
  */
 export async function loadNeedle(timeoutMs = 3000): Promise<NeedleAgent | null> {
-  const bridge =
-    typeof NativeModules !== "undefined" ? NativeModules?.LynxNodeAPI : undefined;
-  if (!bridge) {
-    console.error("[needle] LynxNodeAPI bridge missing");
-    return null;
-  }
+  void timeoutMs;
   try {
-    bridge.requireNodeAddon("needle");
-  } catch (e) {
-    console.error("[needle] requireNodeAddon threw:", String(e));
+    return createNeedle(requireNeedle() as unknown as NeedleAddon);
+  } catch (error) {
+    console.error("[needle] AutoLink NAPI addon unavailable:", String(error));
     return null;
   }
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    const addon = globalThis.__lynx_node_addon_exports__?.needle as
-      | NeedleAddon
-      | undefined;
-    if (addon) {
-      return createNeedle(addon);
-    }
-    await new Promise((r) => setTimeout(r, 50));
-  }
-  console.error("[needle] exports did not appear within", timeoutMs, "ms");
-  return null;
 }
 
 export function createNeedle(addon: NeedleAddon): NeedleAgent {
   if (!addon) {
-    throw new Error("needle addon not loaded; call requireNodeAddon('needle') first");
+    throw new Error("Needle addon not loaded; check Lynx AutoLink integration");
   }
 
   async function run(

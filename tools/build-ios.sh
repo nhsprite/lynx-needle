@@ -4,13 +4,13 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-cmake -S "${ROOT}" -B "${ROOT}/build/ios-device" -G Xcode \
+cmake -S "${ROOT}/ios" -B "${ROOT}/build/ios-device" -G Xcode \
   -DCMAKE_SYSTEM_NAME=iOS \
   -DCMAKE_OSX_SYSROOT=iphoneos \
   -DCMAKE_OSX_ARCHITECTURES=arm64
 cmake --build "${ROOT}/build/ios-device" --config Release
 
-cmake -S "${ROOT}" -B "${ROOT}/build/ios-sim" -G Xcode \
+cmake -S "${ROOT}/ios" -B "${ROOT}/build/ios-sim" -G Xcode \
   -DCMAKE_SYSTEM_NAME=iOS \
   -DCMAKE_OSX_SYSROOT=iphonesimulator \
   -DCMAKE_OSX_ARCHITECTURES=arm64

@@ -1,9 +1,8 @@
 #!/usr/bin/env node
-// Packages the Darwin builds into the iOS pod at ios/:
-//   - needle.xcframework (from build/ios-*/out + build/macos/out static libraries)
-//   - include/addon_use.h (weak-napi static registration helper)
-//   - Loader/LynxNodeAPI.{h,cc} (generated copy of cpp/; edit there)
-//   - needle.podspec
+// Packages the iOS builds into the AutoLink pod at ios/:
+//   - lynx-needle.xcframework (from build/ios-*/out static libraries)
+//   - addon_use.h (generated weak-napi static registration helper)
+//   - lynx-needle.podspec
 import fs from 'fs'
 import path from 'path'
 import { spawnSync } from 'child_process'
@@ -21,13 +20,6 @@ function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true })
 }
 
-function copyIfExists(from, to) {
-  if (fs.existsSync(from)) {
-    ensureDir(path.dirname(to))
-    fs.copyFileSync(from, to)
-  }
-}
-
 function run(command, args, cwd) {
   const result = spawnSync(command, args, {
     cwd,
@@ -40,28 +32,26 @@ function run(command, args, cwd) {
 
 function createPodspec({ outDir, name, version, summary, homepage, license, author }) {
   const podspec = `Pod::Spec.new do |s|
-  s.name = "${name}"
-  s.version = "${version}"
-  s.summary = "${summary}"
-  s.description = <<-DESC
-${summary}
-  DESC
-  s.homepage = "${homepage}"
-  s.license = { :type => "${license}" }
-  s.author = { "${author}" => "author@example.com" }
-  s.source = { :path => "." }
-  s.ios.deployment_target = "12.0"
-  s.osx.deployment_target = "10.15"
-  s.vendored_frameworks = "${name}.xcframework"
-  s.source_files = "Loader/*.{h,mm,cc}"
-  s.public_header_files = "include/*.h", "Loader/*.h"
-  s.preserve_paths = "include/*.h"
+  s.name = '${name}'
+  s.version = '${version}'
+  s.summary = '${summary}'
+  s.homepage = '${homepage}'
+  s.license = { :type => '${license}' }
+  s.author = '${author}'
+  s.source = { :path => '..' }
+  s.platform = :ios, '12.0'
+  s.vendored_frameworks = '${name}.xcframework'
+  s.source_files = 'addon_use.h'
+  s.public_header_files = 'addon_use.h'
+  s.preserve_paths = '${name}.xcframework', 'addon_use.h'
   s.libraries = "c++"
-  s.xcconfig = {
-    "CLANG_CXX_LANGUAGE_STANDARD" => "c++17",
-    "CLANG_CXX_LIBRARY" => "libc++"
+  s.dependency 'LynxWeakNodeAPI/core'
+  s.pod_target_xcconfig = {
+    'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
+    'CLANG_CXX_LIBRARY' => 'libc++',
+    'HEADER_SEARCH_PATHS' => '$(inherited) "\${PODS_ROOT}/LynxWeakNodeAPI/packages/weak-node-api/headers" "\${PODS_TARGET_SRCROOT}/../third_party/needle/include"',
+    'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) NAPI_VERSION=8 NAPI_CPP_CUSTOM_NAMESPACE=needle_node_api LYNX_LIBRARY_MANUAL_NAPI_REGISTRATION=1 LYNX_LIBRARY_USE_PRIMJS_NAPI_MODULE=1'
   }
-  s.dependency "LynxWeakNodeAPI/core"
 end
 `
   fs.writeFileSync(path.join(outDir, `${name}.podspec`), podspec)
@@ -70,7 +60,7 @@ end
 function main() {
   const projectRoot = process.cwd()
   const pkg = readJson(path.join(projectRoot, 'package.json'))
-  const name = 'needle'
+  const name = 'lynx-needle'
   const version = pkg.version || '0.1.0'
   const summary = pkg.description || `${name} N-API addon`
   const homepage = pkg.homepage || 'https://example.com'
@@ -78,15 +68,15 @@ function main() {
   const author = pkg.author || name
 
   // cmake leaves Darwin static libraries in <build-dir>/out (see CMakeLists);
-  // cpp/ holds the public headers for every slice.
+  // weak-node-api headers are only needed to let xcodebuild form an xcframework
+  // from a static archive; the pod itself exposes addon_use.h as the public API.
   const candidates = [
     { buildDir: 'build/ios-device' },
-    { buildDir: 'build/ios-sim' },
-    { buildDir: 'build/macos' }
+    { buildDir: 'build/ios-sim' }
   ]
     .map(({ buildDir }) => ({
-      library: path.join(projectRoot, buildDir, 'out', `lib${name}.a`),
-      headers: path.join(projectRoot, 'cpp')
+      library: path.join(projectRoot, buildDir, 'out', 'libNeedle.a'),
+      headers: path.join(projectRoot, 'node_modules/@lynx-js/weak-node-api/headers')
     }))
     .filter(candidate => fs.existsSync(candidate.library) && fs.existsSync(candidate.headers))
 
@@ -105,17 +95,6 @@ function main() {
   }
   args.push('-output', xcframeworkPath)
   run('xcodebuild', args, projectRoot)
-
-  copyIfExists(path.join(projectRoot, 'cpp/addon_use.h'), path.join(outDir, 'include/addon_use.h'))
-
-  // The iOS pod cannot reference sources outside its root, so sync the shared
-  // native loader into Loader/ (generated copies; canonical versions live in
-  // cpp/ and are used directly by the Android CMake build).
-  for (const f of ['LynxNodeAPI.h', 'LynxNodeAPI.cc']) {
-    const from = path.join(projectRoot, 'cpp', f)
-    if (!fs.existsSync(from)) fail(`Missing shared loader source: ${from}`)
-    fs.copyFileSync(from, path.join(outDir, 'Loader', f))
-  }
 
   createPodspec({
     outDir,

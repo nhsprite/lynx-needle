@@ -1,20 +1,15 @@
 #!/usr/bin/env bash
-# Builds the needle addon for Android (arm64-v8a + armeabi-v7a).
-# Requires: Android NDK (set ANDROID_NDK or have $ANDROID_HOME/ndk installed).
+# Builds the AutoLink Android library module (arm64-v8a + armeabi-v7a).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-if [ -z "${ANDROID_NDK:-}" ]; then
-  ANDROID_NDK="$(ls -d "${ANDROID_HOME:-$HOME/Library/Android/sdk}/ndk/"* 2>/dev/null | sort -V | tail -1)"
+if command -v /usr/libexec/java_home >/dev/null 2>&1; then
+  JDK17_HOME="$(/usr/libexec/java_home -v 17 2>/dev/null || true)"
+  if [ -n "${JDK17_HOME}" ]; then
+    export JAVA_HOME="${JDK17_HOME}"
+  fi
 fi
-[ -n "${ANDROID_NDK}" ] || { echo "ANDROID_NDK not set and no NDK found"; exit 1; }
 
-for abi in armeabi-v7a arm64-v8a; do
-  cmake -S "${ROOT}" -B "${ROOT}/build/android-${abi}" \
-    -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK}/build/cmake/android.toolchain.cmake" \
-    -DANDROID_ABI="${abi}" \
-    -DANDROID_PLATFORM=android-24 \
-    -DCMAKE_BUILD_TYPE=Release
-  cmake --build "${ROOT}/build/android-${abi}"
-done
-ls -lh "${ROOT}"/android/src/main/jniLibs/*/libneedle.so
+(cd "${ROOT}/examples/android-host" && npm install)
+(cd "${ROOT}/examples/android-host" && ./gradlew :lynx_library_lynx_needle:assembleRelease)
+ls -lh "${ROOT}"/android/src/main/jniLibs/*/libNeedle.so

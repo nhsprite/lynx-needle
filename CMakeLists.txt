@@ -61,9 +61,6 @@ target_include_directories(needle PRIVATE "${NEEDLE_ENGINE_DIR}/include")
 target_link_libraries(needle PRIVATE "${_NEEDLE_ENGINE_LIB}")
 message(STATUS "Linking needle engine: ${_NEEDLE_ENGINE_LIB}")
 set(_LYNX_ENABLE_WEAK_SUFFIX ${USE_WEAK_SUFFIX_NAPI})
-if(CMAKE_SYSTEM_NAME STREQUAL "OHOS")
-  set(_LYNX_ENABLE_WEAK_SUFFIX ON)
-endif()
 if(APPLE AND NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND NOT CMAKE_OSX_SYSROOT MATCHES "iphone")
   set(_LYNX_ENABLE_WEAK_SUFFIX ON)
 endif()
@@ -101,24 +98,6 @@ if(ANDROID)
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${_NAPI_ADAPTER}" "${_LYNX_PLATFORM_OUT_DIR}/libnapi_adapter.so"
   )
-elseif(CMAKE_SYSTEM_NAME STREQUAL "OHOS")
-  set(_LYNX_OHOS_ARCH "${OHOS_ARCH}")
-  if(NOT _LYNX_OHOS_ARCH)
-    set(_LYNX_OHOS_ARCH "unknown")
-  endif()
-  set(_LYNX_PLATFORM_OUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/out")
-  add_custom_target(fetch_napi_adapter ALL
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_LIST_DIR}/vendor/harmony"
-    COMMAND node "${CMAKE_CURRENT_LIST_DIR}/scripts/fetch-libs.mjs" --platform harmony --out "${CMAKE_CURRENT_LIST_DIR}/vendor/harmony"
-    BYPRODUCTS "${CMAKE_CURRENT_LIST_DIR}/vendor/harmony/libnapi_adapter.so"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
-  )
-  add_library(napi_adapter SHARED IMPORTED)
-  set_target_properties(napi_adapter PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_LIST_DIR}/vendor/harmony/libnapi_adapter.so")
-  target_link_libraries(needle PRIVATE napi_adapter)
-  set_target_properties(needle PROPERTIES PREFIX "lib" SUFFIX ".so")
-  _lynx_set_output_dir(needle LIBRARY_OUTPUT_DIRECTORY "${_LYNX_PLATFORM_OUT_DIR}")
-  _lynx_set_output_dir(needle RUNTIME_OUTPUT_DIRECTORY "${_LYNX_PLATFORM_OUT_DIR}")
 elseif(WIN32)
   message(FATAL_ERROR "Windows support is coming soon.")
 elseif(APPLE)
@@ -138,7 +117,7 @@ elseif(APPLE)
             "${_LYNX_PLATFORM_OUT_DIR}/libneedle.a"
   )
 else()
-  message(FATAL_ERROR "Unsupported platform for this scaffold. Use Android, OHOS, iOS, or macOS toolchains. Windows support is coming soon.")
+  message(FATAL_ERROR "Unsupported platform for this scaffold. Use Android, iOS, or macOS toolchains. Windows support is coming soon.")
 endif()
 
 message(STATUS "Addon artifacts will be written under: ${_LYNX_PLATFORM_OUT_DIR}")

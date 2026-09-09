@@ -1,0 +1,29 @@
+{
+  "platforms": {
+    "android": {
+      "packageName": "com.lynxneedle.autolink",
+      "sourceDir": "android",
+      "providerClassName": null,
+      "nodeApiAddons": [
+        {
+          "name": "Needle",
+          "libraryName": "Needle",
+          "required": true
+        }
+      ]
+    },
+    "ios": {
+      "sourceDir": "ios",
+      "podspecPath": "ios/lynx-needle.podspec",
+      "nodeApiAddons": [
+        {
+          "name": "Needle",
+          "podName": "lynx-needle",
+          "podspecPath": "ios/lynx-needle.podspec",
+          "addonUseHeader": "addon_use.h",
+          "required": true
+        }
+      ]
+    }
+  }
+}

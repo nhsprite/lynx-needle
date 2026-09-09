@@ -2,23 +2,40 @@ plugins {
     id 'com.android.library'
 }
 
+def primjsVersion = rootProject.findProperty('lynx.primjs.version') ?: '4.2.0-alpha.0-SNAPSHOT'
+
+configurations {
+    primjsNativeAar
+}
+
+def primjsNativeDir = layout.buildDirectory.dir('primjs-native')
+
+tasks.register('extractPrimjsNativeLibraries', Sync) {
+    from(configurations.primjsNativeAar.incoming.artifactView {}.files.collect { zipTree(it) })
+    include 'jni/**/*.so'
+    into primjsNativeDir
+}
+
 android {
-    namespace 'com.lynxneedle.sdk'
+    namespace 'com.lynxneedle.autolink'
     compileSdk 35
 
     defaultConfig {
-        minSdk 24
+        minSdk 23
 
         ndk { abiFilters 'arm64-v8a', 'armeabi-v7a' }
         externalNativeBuild {
-            cmake { abiFilters 'arm64-v8a', 'armeabi-v7a' }
+            cmake {
+                abiFilters 'arm64-v8a', 'armeabi-v7a'
+                arguments "-DLYNX_PRIMJS_JNI_DIR=${primjsNativeDir.get().asFile.absolutePath}/jni"
+            }
         }
     }
 
     externalNativeBuild {
         cmake {
-            path file('src/main/cpp/CMakeLists.txt')
-            version '3.22.1'
+            path file('CMakeLists.txt')
+            version '3.18.1'
         }
     }
 
@@ -26,12 +43,23 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
+    sourceSets {
+        main {
+            java.srcDirs = []
+        }
+    }
 }
 
 dependencies {
-    // The host app provides the Lynx runtime at whatever version it chooses.
-    // The NAPI addon flow requires a runtime with NAPI binding; the first such
-    // published artifacts are the 4.3.0 nightlies (RuntimeLifecycleListener's
-    // onRuntimeAttach(long, String) two-arg signature matches those).
-    compileOnly 'org.lynxsdk.lynx:lynx:4.3.0-nightly.202609010611.167.g17ad2906-SNAPSHOT'
+    implementation "org.lynxsdk.lynx:primjs:${primjsVersion}"
+    primjsNativeAar "org.lynxsdk.lynx:primjs:${primjsVersion}@aar"
+}
+
+tasks.configureEach {
+    if (name.startsWith('configureCMake')
+        || name.startsWith('generateJsonModel')
+        || name.startsWith('externalNativeBuild')) {
+        dependsOn tasks.named('extractPrimjsNativeLibraries')
+    }
 }

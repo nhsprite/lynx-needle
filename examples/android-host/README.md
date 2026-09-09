@@ -8,13 +8,14 @@ emulator.
 
 ```bash
 # at the repo root — one-time or after addon changes
-npm install                       # weak-node-api headers for the JNI glue
+npm install                       # AutoLink codegen + weak-node-api headers
 npm run fetch-engine              # engine static libs
-npm run build:android             # -> android/src/main/jniLibs/<abi>/{libneedle,libnapi_adapter}.so
+npm run build                     # BTS facade + registration sources
+npm run build:android             # -> android/src/main/jniLibs/<abi>/libNeedle.so
 
 # then build the APK (JDK 17)
 cd examples/android-host
-./gradlew :app:assembleDebug
+JAVA_HOME=$(/usr/libexec/java_home -v 17) ./gradlew :app:assembleDebug
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
@@ -26,21 +27,21 @@ http://<your-ip>:3000/main.lynx.bundle` loads a bundle without scanning.)
 ## How it works
 
 - `HostApplication` — registers Lynx log/http services, `LynxEnv.init`, then
-  `LynxNeedle.registerModule()` (from `android/`)
+  `LynxAutolinkGenerated.setupGlobal(this)`
 - `MainActivity` — scans the dev-server QR code (zxing), builds a `LynxView`,
-  calls `LynxNeedle.attach(lynxView)`, renders the scanned bundle URL
-- All NAPI loader plumbing (module, JNI, native loader, jniLibs) lives in the
-  `android/` library module
+  and renders the scanned bundle URL
+- The Lynx library plugins scan the `lynx-needle` npm dependency, include its
+  Android library project, generate the registry, load `libNeedle.so`, and
+  register addon name `Needle`
 
 ## Notes
 
-- **The example pins the 4.3.0 nightly snapshot**, the first published Lynx
-  build with NAPI binding (fetched from the Maven Central snapshot repository
-  declared in `settings.gradle`). Older release-repo binaries compile it out —
-  there the page renders but reports "addon not available"
-  (`onRuntimeAttach` never fires). A source-built `liblynx.so`
-  (`enable_napi_binding=true enable_lepusng_worklet=true`) also works;
-  `packagingOptions.pickFirst '**/liblynx.so'` in `app/build.gradle` already
-  prefers a copy dropped into `app/src/main/jniLibs/<abi>/`.
+- The example pins
+  `4.3.0-nightly.202609080610.178.gcd26ecb7-SNAPSHOT` and resolves it from the
+  Maven Central snapshot repository declared in `settings.gradle`.
+- `lynx.primjs.version` is pinned to `4.2.0-alpha.0-SNAPSHOT`, matching the
+  PrimJS dependency declared by that Lynx nightly. Do not override it to
+  `4.3.0-alpha.0-SNAPSHOT` for this SDK snapshot; the page fails while
+  evaluating `lynx_core.js`.
 - The app ships only `arm64-v8a`; the SDK module itself builds both
   `arm64-v8a` and `armeabi-v7a`.

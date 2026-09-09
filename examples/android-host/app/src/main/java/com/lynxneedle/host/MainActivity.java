@@ -17,7 +17,6 @@ import com.journeyapps.barcodescanner.ScanOptions;
 import com.lynx.tasm.LynxView;
 import com.lynx.tasm.LynxViewBuilder;
 import com.lynx.tasm.TemplateData;
-import com.lynxneedle.sdk.LynxNeedle;
 import java.util.HashMap;
 
 /**
@@ -115,7 +114,6 @@ public class MainActivity extends ComponentActivity {
   private void load(String url) {
     unload();
     lynxView = new LynxViewBuilder().build(this);
-    LynxNeedle.attach(lynxView);
     container.addView(lynxView);
     lynxView.renderTemplateUrl(url, TemplateData.fromMap(new HashMap<>()));
     emptyState.setVisibility(View.GONE);

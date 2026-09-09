@@ -57,50 +57,6 @@ function unzipSingle(archive, innerPath, dest) {
   })
 }
 
-function tarExtractSingle(archive, innerPath, dest, extraArgs = []) {
-  return new Promise((resolve, reject) => {
-    const p = spawn('tar', [...extraArgs, '-xOf', archive, innerPath])
-    const w = fs.createWriteStream(dest)
-    p.stdout.pipe(w)
-    p.on('error', reject)
-    p.on('close', code => code === 0 ? resolve() : reject(new Error('tar extract failed')))
-  })
-}
-
-async function extractSingle({ archive, innerPaths, dest }) {
-  let lastErr = null
-  for (const innerPath of innerPaths) {
-    // Try ZIP-style extraction first (AAR is a ZIP; some HARs may also be ZIP).
-    try {
-      await unzipSingle(archive, innerPath, dest)
-      return
-    } catch (e) {
-      lastErr = e
-      try { if (fs.existsSync(dest)) fs.unlinkSync(dest) } catch {}
-    }
-
-    // Try TAR-style extraction (HAR is commonly a tar archive, often with a "package/" prefix).
-    try {
-      await tarExtractSingle(archive, innerPath, dest)
-      return
-    } catch (e) {
-      lastErr = e
-      try { if (fs.existsSync(dest)) fs.unlinkSync(dest) } catch {}
-    }
-
-    // Some environments require explicit gzip flag.
-    try {
-      await tarExtractSingle(archive, innerPath, dest, ['-z'])
-      return
-    } catch (e) {
-      lastErr = e
-      try { if (fs.existsSync(dest)) fs.unlinkSync(dest) } catch {}
-    }
-  }
-  const tried = innerPaths.map(p => `- ${p}`).join('\n')
-  throw new Error(`Failed to extract requested file from archive.\nTried paths:\n${tried}\nLast error: ${lastErr?.message || lastErr}`)
-}
-
 async function main() {
   const { platform, out, abi } = parseArgs()
   if (!platform || !out) {
@@ -122,22 +78,6 @@ async function main() {
     if (!fs.existsSync(dest)) {
       await download(url, archive)
       await unzipSingle(archive, inner, dest)
-    }
-  } else if (platform === 'harmony') {
-    const url = sources.harmony?.packageUrl
-    const innerPaths = sources.harmony?.libraryPaths
-    if (!url || !Array.isArray(innerPaths) || innerPaths.length === 0) {
-      throw new Error('Missing harmony.packageUrl or harmony.libraryPaths in artifact-sources.json')
-    }
-    const archive = path.join(out, 'harmony-package.har')
-    if (!fs.existsSync(path.join(out, 'libnapi_adapter.so'))) {
-      await download(url, archive)
-      const dest = path.join(out, 'libnapi_adapter.so')
-      await extractSingle({
-        archive,
-        dest,
-        innerPaths
-      })
     }
   } else if (platform === 'win') {
     const url = sources.win?.packageUrl

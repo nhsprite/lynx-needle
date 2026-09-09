@@ -2,6 +2,7 @@ node_modules/
 build/
 lib/
 vendor/
+shared/third_party/
 third_party/needle/*/libneedle.a
 third_party/needle/include/needle.h
 android/.gradle/
@@ -10,6 +11,7 @@ android/build/
 android/src/main/jniLibs/
 ios/needle.xcframework/
 ios/needle.podspec
+ios/lynx-needle.xcframework/
 ios/include/
 ios/Loader/LynxNodeAPI.h
 ios/Loader/LynxNodeAPI.cc
@@ -17,6 +19,7 @@ examples/android-host/.gradle/
 examples/android-host/app/build/
 examples/android-host/local.properties
 examples/ios-host/Pods/
+examples/ios-host/generated/
 examples/ios-host/NeedleHost.xcworkspace/
 examples/ios-host/NeedleHost.xcodeproj/
 examples/lynx-needle-demo/node_modules/

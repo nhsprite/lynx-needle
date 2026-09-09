@@ -2,7 +2,7 @@
   "name": "lynx-needle",
   "private": true,
   "version": "0.1.0",
-  "description": "Lynx NAPI addon embedding Cactus Needle 2 — a 45M-parameter, 2-bit on-device tool-calling model — for Lynx pages on Android and iOS.",
+  "description": "Lynx AutoLink NAPI addon embedding Cactus Needle 2 for Android and iOS.",
   "keywords": [
     "lynx",
     "napi",
@@ -20,27 +20,52 @@
     ".": {
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
-    "lib"
+    "android/CMakeLists.txt",
+    "android/build.gradle",
+    "android/src/main/AndroidManifest.xml",
+    "cpp/shim_hash_memory.cc",
+    "generated",
+    "ios/CMakeLists.txt",
+    "ios/addon_use.h",
+    "ios/generated",
+    "ios/lynx-needle.podspec",
+    "ios/lynx-needle.xcframework",
+    "lib",
+    "scripts",
+    "shared/CMakeLists.txt",
+    "shared/nativeModule",
+    "third_party/needle",
+    "tools",
+    "types",
+    "LICENSE",
+    "README.md",
+    "lynx.lib.json"
   ],
   "engines": {
     "node": ">=22"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "prepack": "npm run build",
+    "build": "npm run codegen && tsc -p tsconfig.json && tsc -p tsconfig.generated.json",
+    "codegen": "lynx-autolink-codegen",
+    "prepack": "lynx-autolink-codegen >/dev/null && tsc -p tsconfig.json && tsc -p tsconfig.generated.json",
     "fetch-engine": "bash tools/fetch-engine.sh",
     "deps:android": "node scripts/fetch-libs.mjs --platform android --out vendor/android",
-    "deps:harmony": "node scripts/fetch-libs.mjs --platform harmony --out vendor/harmony",
     "build:android": "bash tools/build-android.sh",
     "build:ios": "bash tools/build-ios.sh",
     "build:macos": "cmake -S . -B build/macos -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 && cmake --build build/macos",
     "package:darwin": "node scripts/package-darwin.mjs"
   },
+  "dependencies": {
+    "@lynx-js/lynx-library-headers": "0.0.21",
+    "@lynx-js/weak-node-api": "0.1.0"
+  },
   "devDependencies": {
-    "@lynx-js/weak-node-api": "0.1.0",
+    "@lynx-js/autolink-codegen": "npm:@lynx-js/autolink-codegen-canary@0.6.0-canary-20260908-9352a903",
+    "create-lynx-library-canary": "0.6.1-canary-20260908-9352a903",
     "typescript": "^5.9.0"
   }
 }
