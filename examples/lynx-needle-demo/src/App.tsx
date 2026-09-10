@@ -241,7 +241,7 @@ export function App() {
           <text className="setup-tag">addon not available</text>
           <text className="setup-text">
             The needle NAPI addon is not loaded. To run this demo:{'\n\n'}
-            1. Build the package and the platform addon in the repo root.
+            1. Build packages/lynx-needle and the platform addon.
             {'\n'}
             2. Android: apply the Lynx library plugins and call
             LynxAutolinkGenerated.setupGlobal after LynxEnv.init.{'\n'}

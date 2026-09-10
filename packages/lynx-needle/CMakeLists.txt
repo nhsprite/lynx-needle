@@ -4,7 +4,31 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 option(USE_WEAK_SUFFIX_NAPI "Enable weak suffix remapping for Node-API" OFF)
-set(_WEAK_NODE_API_CONFIG "${CMAKE_CURRENT_LIST_DIR}/node_modules/@lynx-js/weak-node-api/weak-node-api-config.cmake")
+
+if(NOT DEFINED NODE_EXECUTABLE)
+  find_program(NODE_EXECUTABLE NAMES node)
+endif()
+if(NOT NODE_EXECUTABLE)
+  message(FATAL_ERROR "Unable to find node. Install Node.js before configuring the addon.")
+endif()
+
+execute_process(
+  COMMAND
+    "${NODE_EXECUTABLE}"
+    -p
+    "require('node:path').dirname(require.resolve('@lynx-js/weak-node-api/package.json'))"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+  RESULT_VARIABLE WEAK_NODE_API_RESULT
+  OUTPUT_VARIABLE WEAK_NODE_API_PACKAGE_ROOT
+  ERROR_VARIABLE WEAK_NODE_API_ERROR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(NOT WEAK_NODE_API_RESULT EQUAL 0 OR NOT WEAK_NODE_API_PACKAGE_ROOT)
+  string(REPLACE "\n" " " WEAK_NODE_API_ERROR "${WEAK_NODE_API_ERROR}")
+  message(FATAL_ERROR "Unable to resolve @lynx-js/weak-node-api. Run npm install first. ${WEAK_NODE_API_ERROR}")
+endif()
+
+set(_WEAK_NODE_API_CONFIG "${WEAK_NODE_API_PACKAGE_ROOT}/weak-node-api-config.cmake")
 if(NOT EXISTS "${_WEAK_NODE_API_CONFIG}")
   message(FATAL_ERROR "weak-node-api-config.cmake not found: ${_WEAK_NODE_API_CONFIG}. Run npm install first.")
 endif()

@@ -19,8 +19,8 @@ tool calling and structured extraction, running entirely on the phone.
 ## Run it
 
 ```bash
-npm run build        # one-time, at the repo ROOT: generates lib/ (tsc)
-npm install          # also links the local "lynx-needle" npm package (file:../..)
+npm run build        # one-time, at the repo root; generates packages/lynx-needle/lib/ (tsc)
+npm install          # also links the local "lynx-needle" npm package (file:../../packages/lynx-needle)
 npm run dev          # serves main.lynx.bundle, prints a QR code
 ```
 

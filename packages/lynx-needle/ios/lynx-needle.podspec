@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
   s.name = 'lynx-needle'
   s.version = '0.1.0'
   s.summary = 'Lynx AutoLink NAPI addon embedding Cactus Needle 2 for Android and iOS.'
-  s.homepage = 'https://example.com'
+  s.homepage = 'https://github.com/nhsprite/lynx-needle'
   s.license = { :type => 'MIT' }
   s.author = 'lynx-needle'
   s.source = { :path => '..' }

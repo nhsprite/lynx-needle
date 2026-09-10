@@ -2,7 +2,7 @@
 # Fetches the prebuilt Needle engine (needle.h + libneedle.a) from Hugging Face.
 #
 # Usage:
-#   tools/fetch-engine.sh                 # all mobile targets
+#   tools/fetch-engine.sh                 # all supported targets
 #   tools/fetch-engine.sh android-arm64 ios-arm64 ...
 #
 # Engine version: 2.0.3 (needle/agent/fetch.py ENGINE_VERSION). The .a and the
@@ -13,7 +13,7 @@ HF_BASE="https://huggingface.co/Cactus-Compute/needle2/resolve/main"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT_DIR="${ROOT}/third_party/needle"
 
-ALL_PLATFORMS=(android-arm64 android-armv7 ios-arm64 ios-sim-arm64)
+ALL_PLATFORMS=(android-arm64 android-armv7 ios-arm64 ios-sim-arm64 macos-arm64)
 PLATFORMS=("$@")
 if [ ${#PLATFORMS[@]} -eq 0 ]; then
   PLATFORMS=("${ALL_PLATFORMS[@]}")

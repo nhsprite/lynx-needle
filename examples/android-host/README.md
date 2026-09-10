@@ -1,6 +1,6 @@
 # Needle Host (Android example)
 
-Minimal Lynx host app showing how to integrate `android/` and load the
+Minimal Lynx host app showing how to integrate `packages/lynx-needle/android/` and load the
 frontend demo bundle (`examples/lynx-needle-demo`) on a real device or
 emulator.
 
@@ -11,7 +11,7 @@ emulator.
 npm install                       # AutoLink codegen + weak-node-api headers
 npm run fetch-engine              # engine static libs
 npm run build                     # BTS facade + registration sources
-npm run build:android             # -> android/src/main/jniLibs/<abi>/libNeedle.so
+npm run build:android             # -> packages/lynx-needle/android/src/main/jniLibs/<abi>/libNeedle.so
 
 # then build the APK (JDK 17)
 cd examples/android-host

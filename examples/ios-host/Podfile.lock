@@ -52,7 +52,7 @@ PODS:
 
 DEPENDENCIES:
   - Lynx (= 4.3.0-nightly.202609090610.180.g5e30c9e6)
-  - lynx-needle (from `../../ios`)
+  - lynx-needle (from `../../packages/lynx-needle/ios`)
   - LynxBase (= 4.3.0-nightly.202609090610.180.g5e30c9e6)
   - LynxLibraryRegistry (from `generated/lynx-library`)
   - LynxServiceAPI (= 4.3.0-nightly.202609090610.180.g5e30c9e6)
@@ -68,7 +68,7 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   lynx-needle:
-    :path: "../../ios"
+    :path: "../../packages/lynx-needle/ios"
   LynxLibraryRegistry:
     :path: "generated/lynx-library"
 

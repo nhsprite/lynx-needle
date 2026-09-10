@@ -1,13 +1,14 @@
 # Needle Host (iOS example)
 
-Minimal Lynx host app showing how to integrate `ios/` and load the
+Minimal Lynx host app showing how to integrate `packages/lynx-needle/ios/` and load the
 frontend demo bundle (`examples/lynx-needle-demo`).
 
 ## Build & run
 
 ```bash
 # at the repo root — one-time or after addon changes
-npm run build:ios && npm run package:darwin   # -> ios/ artifacts
+npm run build:ios             # -> packages/lynx-needle/ios/ artifacts
+(cd examples/lynx-needle-demo && npm install && npm run build)
 
 # here
 ruby generate-project.rb      # one-time; uses the xcodeproj gem (bundled with CocoaPods)
@@ -15,10 +16,10 @@ pod install
 open NeedleHost.xcworkspace   # build & run on a device or simulator
 ```
 
-The host loads the default bundle URL on startup. For local development and
-simulator automation, pass the demo bundle URL
-(`http://<your-ip>:3000/main.lynx.bundle` from `npm run dev` in
-`examples/lynx-needle-demo`) with `NEEDLE_BUNDLE_URL` or `--url`.
+The host prefers the bundled demo template
+(`examples/lynx-needle-demo/dist/main.lynx.bundle`) on startup. For local
+development and simulator automation, pass a remote demo bundle URL such as
+`http://<your-ip>:3001/main.lynx.bundle` with `NEEDLE_BUNDLE_URL` or `--url`.
 
 ## How it works
 
@@ -29,7 +30,7 @@ simulator automation, pass the demo bundle URL
 - `cocoapods-lynx-library` — scans the local `lynx-needle` npm dependency,
   adds the `lynx-needle` pod, installs the PrimJS weak Node-API bridge, and
   generates `LynxGeneratedNodeAPIAddonUse.mm`
-- The pod (`ios/`) provides the xcframework and `addon_use.h` retention helper
+- The pod (`packages/lynx-needle/ios/`) provides the xcframework and `addon_use.h` retention helper
 
 ## Notes
 

@@ -3,6 +3,6 @@
   "private": true,
   "version": "0.1.0",
   "dependencies": {
-    "lynx-needle": "file:../.."
+    "lynx-needle": "file:../../packages/lynx-needle"
   }
 }

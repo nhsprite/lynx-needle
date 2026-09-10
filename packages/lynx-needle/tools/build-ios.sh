@@ -16,4 +16,4 @@ cmake -S "${ROOT}/ios" -B "${ROOT}/build/ios-sim" -G Xcode \
   -DCMAKE_OSX_ARCHITECTURES=arm64
 cmake --build "${ROOT}/build/ios-sim" --config Release
 
-(cd "${ROOT}" && npm run package:darwin)
+(cd "${ROOT}" && node scripts/package-darwin.mjs)

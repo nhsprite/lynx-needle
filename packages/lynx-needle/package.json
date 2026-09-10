@@ -1,0 +1,81 @@
+{
+  "name": "lynx-needle",
+  "version": "0.1.0",
+  "description": "Lynx AutoLink NAPI addon embedding Cactus Needle 2 for Android and iOS.",
+  "homepage": "https://github.com/nhsprite/lynx-needle",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nhsprite/lynx-needle.git",
+    "directory": "packages/lynx-needle"
+  },
+  "keywords": [
+    "lynx",
+    "napi",
+    "addon",
+    "needle",
+    "tool-calling",
+    "on-device",
+    "llm"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "CMakeLists.txt",
+    "android/CMakeLists.txt",
+    "android/build.gradle",
+    "android/src/main/AndroidManifest.xml",
+    "cpp",
+    "docs",
+    "generated",
+    "ios/CMakeLists.txt",
+    "ios/addon_use.h",
+    "ios/generated",
+    "ios/lynx-needle.podspec",
+    "ios/lynx-needle.xcframework",
+    "lib",
+    "scripts",
+    "shared/CMakeLists.txt",
+    "shared/nativeModule",
+    "src",
+    "third_party/needle",
+    "tools",
+    "tsconfig.generated.json",
+    "tsconfig.json",
+    "types",
+    "LICENSE",
+    "README.md",
+    "lynx.lib.json"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "npm run codegen && tsc -p tsconfig.json && tsc -p tsconfig.generated.json",
+    "codegen": "lynx-autolink-codegen",
+    "prepack": "lynx-autolink-codegen >/dev/null && tsc -p tsconfig.json && tsc -p tsconfig.generated.json",
+    "fetch-engine": "bash tools/fetch-engine.sh",
+    "deps:android": "node scripts/fetch-libs.mjs --platform android --out vendor/android",
+    "build:android": "bash tools/build-android.sh",
+    "build:ios": "bash tools/build-ios.sh",
+    "build:macos": "cmake -S . -B build/macos -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 && cmake --build build/macos",
+    "package:darwin": "node scripts/package-darwin.mjs"
+  },
+  "dependencies": {
+    "@lynx-js/lynx-library-headers": "0.0.21",
+    "@lynx-js/weak-node-api": "0.1.0"
+  },
+  "devDependencies": {
+    "@lynx-js/autolink-codegen": "npm:@lynx-js/autolink-codegen-canary@0.6.0-canary-20260908-9352a903",
+    "create-lynx-library-canary": "0.6.1-canary-20260908-9352a903",
+    "typescript": "^5.9.0"
+  }
+}

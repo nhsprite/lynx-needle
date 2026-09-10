@@ -6,6 +6,9 @@
 import fs from 'fs'
 import path from 'path'
 import { spawnSync } from 'child_process'
+import { createRequire } from 'module'
+
+const require = createRequire(import.meta.url)
 
 function fail(message) {
   console.error(message)
@@ -28,6 +31,10 @@ function run(command, args, cwd) {
   if (result.status !== 0) {
     fail(`Command failed: ${command} ${args.join(' ')}`)
   }
+}
+
+function resolvePackageRoot(packageName) {
+  return path.dirname(require.resolve(`${packageName}/package.json`))
 }
 
 function createPodspec({ outDir, name, version, summary, homepage, license, author }) {
@@ -63,9 +70,13 @@ function main() {
   const name = 'lynx-needle'
   const version = pkg.version || '0.1.0'
   const summary = pkg.description || `${name} N-API addon`
-  const homepage = pkg.homepage || 'https://example.com'
+  const homepage = pkg.homepage || 'https://github.com/nhsprite/lynx-needle'
   const license = pkg.license || 'Apache-2.0'
   const author = pkg.author || name
+  const weakNodeApiHeaders = path.join(
+    resolvePackageRoot('@lynx-js/weak-node-api'),
+    'headers'
+  )
 
   // cmake leaves Darwin static libraries in <build-dir>/out (see CMakeLists);
   // weak-node-api headers are only needed to let xcodebuild form an xcframework
@@ -76,7 +87,7 @@ function main() {
   ]
     .map(({ buildDir }) => ({
       library: path.join(projectRoot, buildDir, 'out', 'libNeedle.a'),
-      headers: path.join(projectRoot, 'node_modules/@lynx-js/weak-node-api/headers')
+      headers: weakNodeApiHeaders
     }))
     .filter(candidate => fs.existsSync(candidate.library) && fs.existsSync(candidate.headers))
 

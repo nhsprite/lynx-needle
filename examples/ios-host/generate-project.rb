@@ -22,6 +22,9 @@ group = project.main_group.new_group('NeedleHost', 'NeedleHost')
   target.add_file_references([ref]) if f.end_with?('.m', '.mm')
 end
 
+bundle_ref = project.main_group.new_file('../lynx-needle-demo/dist/main.lynx.bundle')
+target.resources_build_phase.add_file_reference(bundle_ref)
+
 target.build_configurations.each do |config|
   config.build_settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.lynxneedle.host'
   config.build_settings['INFOPLIST_FILE'] = 'NeedleHost/Info.plist'

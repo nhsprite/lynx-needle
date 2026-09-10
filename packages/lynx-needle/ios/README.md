@@ -4,7 +4,7 @@ CocoaPods pod that gives a Lynx host app everything needed to load the
 `Needle` NAPI addon through Lynx AutoLink:
 
 - `lynx-needle.xcframework` — the addon with the engine statically merged in
-  (device + simulator slices; produced by `npm run package:darwin`)
+  (device + simulator slices; produced by `npm run build:ios`)
 - `addon_use.h` — generated `NAPI_USE(Needle)` retention helper consumed by
   the generated AutoLink registry pod
 - `generated/NeedleNapiWrapper.cc` — generated CocoaPods compile entry that
@@ -17,7 +17,7 @@ CocoaPods pod that gives a Lynx host app everything needed to load the
   `https://github.com/lynx-family/Specs.git`.
 - Host Podfile applies `cocoapods-lynx-library` and calls `use_lynx_library!`
   so the plugin can scan the npm dependency's `lynx.lib.json`.
-- Repo root: `npm run build:ios && npm run package:darwin`.
+- Repo root: `npm run build:ios`.
 
 ## Usage
 

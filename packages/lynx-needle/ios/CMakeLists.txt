@@ -12,8 +12,31 @@ get_filename_component(
   ABSOLUTE
 )
 
+if(NOT DEFINED NODE_EXECUTABLE)
+  find_program(NODE_EXECUTABLE NAMES node)
+endif()
+if(NOT NODE_EXECUTABLE)
+  message(FATAL_ERROR "Unable to find node. Install Node.js before configuring the iOS target.")
+endif()
+
+execute_process(
+  COMMAND
+    "${NODE_EXECUTABLE}"
+    -p
+    "require('node:path').dirname(require.resolve('@lynx-js/weak-node-api/package.json'))"
+  WORKING_DIRECTORY "${LYNX_LIBRARY_PACKAGE_ROOT}"
+  RESULT_VARIABLE WEAK_NODE_API_RESULT
+  OUTPUT_VARIABLE WEAK_NODE_API_PACKAGE_ROOT
+  ERROR_VARIABLE WEAK_NODE_API_ERROR
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(NOT WEAK_NODE_API_RESULT EQUAL 0 OR NOT WEAK_NODE_API_PACKAGE_ROOT)
+  string(REPLACE "\n" " " WEAK_NODE_API_ERROR "${WEAK_NODE_API_ERROR}")
+  message(FATAL_ERROR "Unable to resolve @lynx-js/weak-node-api. Run npm install first. ${WEAK_NODE_API_ERROR}")
+endif()
+
 set(WEAK_NODE_API_HEADERS
-  "${LYNX_LIBRARY_PACKAGE_ROOT}/node_modules/@lynx-js/weak-node-api/headers"
+  "${WEAK_NODE_API_PACKAGE_ROOT}/headers"
 )
 if(NOT EXISTS "${WEAK_NODE_API_HEADERS}/napi.h")
   message(FATAL_ERROR "Missing weak-node-api headers. Run npm install first.")
