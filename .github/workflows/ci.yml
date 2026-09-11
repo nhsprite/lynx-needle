@@ -17,6 +17,8 @@ concurrency:
 
 env:
   NODE_VERSION: 22.18.0
+  NPM_VERSION: 11.19.1
+  NPM_CONFIG_REGISTRY: https://registry.npmjs.org
 
 jobs:
   javascript:
@@ -35,6 +37,9 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             examples/lynx-needle-demo/package-lock.json
+
+      - name: Set up npm
+        run: npm install --global npm@${{ env.NPM_VERSION }}
 
       - name: Install package dependencies
         run: npm ci
@@ -67,6 +72,9 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             examples/android-host/package-lock.json
+
+      - name: Set up npm
+        run: npm install --global npm@${{ env.NPM_VERSION }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
@@ -116,6 +124,9 @@ jobs:
             package-lock.json
             examples/ios-host/package-lock.json
             examples/lynx-needle-demo/package-lock.json
+
+      - name: Set up npm
+        run: npm install --global npm@${{ env.NPM_VERSION }}
 
       - name: Install package dependencies
         run: npm ci
