@@ -120,16 +120,27 @@ gem 'cocoapods-lynx-library', '4.3.0.pre.nightly.202609090610.180.g5e30c9e6'
 
 ```ruby
 # Podfile
+platform :ios, '12.0'
 source 'https://github.com/lynx-family/Specs.git'
 source 'https://cdn.cocoapods.org/'
 
-install! 'cocoapods', :generate_multiple_pod_projects => true
+install! 'cocoapods',
+         :generate_multiple_pod_projects => true,
+         :incremental_installation => true
 plugin 'cocoapods-lynx-library'
 
 target 'YourApp' do
   use_frameworks! :linkage => :static
-  use_lynx_library!(:root => __dir__)
-  pod 'Lynx', '4.3.0-nightly.202609090610.180.g5e30c9e6'
+
+  use_lynx_library!(
+    :root => __dir__,
+    :output_dir => File.join(__dir__, 'generated/lynx-library')
+  )
+
+  lynx_version = '4.3.0-nightly.202609090610.180.g5e30c9e6'
+  pod 'Lynx', lynx_version
+  pod 'LynxBase', lynx_version
+  pod 'LynxServiceAPI', lynx_version
 end
 ```
 
@@ -202,7 +213,8 @@ API summary (full types in `src/needle.ts`):
 
 - `loadNeedle(timeoutMs?) → Promise<NeedleAgent | null>` — asks the generated
   AutoLink facade for addon `Needle`; it returns `null` if the host has not
-  installed the Lynx NAPI loader.
+  installed the Lynx NAPI loader. `timeoutMs` is retained for API compatibility
+  but is currently ignored because loading is synchronous.
 - `init(system, tools, toolIndexPath?)` — (re)start the session.
 - `complete(input, maxNewTokens?) → Promise<NeedleResponse>` — raw inference,
   off the JS thread.
@@ -218,6 +230,9 @@ API summary (full types in `src/needle.ts`):
 ```json
 {
   "type": "call",
+  "success": true,
+  "error": null,
+  "error_code": null,
   "function_calls": [{"name": "set_lights", "arguments": {"room": "living room", "on": true, "brightness": 30}}],
   "confidence": 0.92,
   "reasoning": "...",
@@ -313,7 +328,6 @@ longer export; the shim is the canonical libc++ murmur2 implementation.
 ```bash
 npm run build:ios
 # -> build/ios-{device,sim}/out/libNeedle.a (merged with engine)
-npm run package:darwin
 # -> ios/{lynx-needle.xcframework, lynx-needle.podspec, addon_use.h}
 ```
 
