@@ -19,15 +19,15 @@ tool calling and structured extraction, running entirely on the phone.
 ## Run it
 
 ```bash
-npm run build        # one-time, at the repo ROOT: generates lib/ (tsc)
-npm install          # also links the local "lynx-needle" npm package (file:../..)
+npm run build        # one-time, at the repo root; generates packages/lynx-needle/lib/ (tsc)
+npm install          # also links the local "lynx-needle" npm package (file:../../packages/lynx-needle)
 npm run dev          # serves main.lynx.bundle, prints a QR code
 ```
 
-Then open the printed URL in a host app with the NAPI addon loader integrated
-— use `examples/android-host` or `examples/ios-host`. Note: the published
-Lynx SDK binaries do NOT include NAPI binding (see the repo-root README), so
-stock LynxExplorer will show the "addon not available" screen.
+Then open the printed URL in an AutoLink-enabled host app that depends on
+`lynx-needle` — use `examples/android-host` or `examples/ios-host`. The host
+must use a Lynx 4.3 nightly or another runtime built with NAPI binding;
+otherwise the page shows the "addon not available" screen.
 
 ```
 http://<your-ip>:3000/main.lynx.bundle
@@ -35,11 +35,10 @@ http://<your-ip>:3000/main.lynx.bundle
 
 ## How it uses the npm package
 
-- `loadNeedle()` (from `lynx-needle`) asks the host's `LynxNodeAPI` module to
-  load the addon and polls `globalThis.__lynx_node_addon_exports__` until the
-  exports appear (the bridge call is async fire-and-forget; `NativeModules` is
-  a bundle-scope identifier injected by Lynx, not a real global). Returns
-  `null` when the host can't load addons — the app then shows a setup screen.
+- `loadNeedle()` (from `lynx-needle`) calls the generated AutoLink facade,
+  which resolves `Needle` through `globalThis.getNapiLoader()`,
+  `globalThis.__lynxNapiLoader`, or `lynx.getModuleLoader()`. Returns `null`
+  when the host has not registered the addon.
 - The returned agent exposes `init / complete / reset / load / engineVersion`
   plus the `run` agent loop and one-shot `extract`.
 

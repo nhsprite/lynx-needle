@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@lynx-js/react": "^0.125.0",
-    "lynx-needle": "file:../.."
+    "lynx-needle": "file:../../packages/lynx-needle"
   },
   "devDependencies": {
     "@lynx-js/qrcode-rsbuild-plugin": "^0.6.0",

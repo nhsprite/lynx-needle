@@ -1,3 +1,4 @@
 plugins {
     id 'com.android.application' version '8.5.2' apply false
+    id 'org.lynxsdk.lynx.library-build' apply false
 }

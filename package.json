@@ -1,46 +1,19 @@
 {
-  "name": "lynx-needle",
+  "name": "lynx-needle-workspace",
   "private": true,
-  "version": "0.1.0",
-  "description": "Lynx NAPI addon embedding Cactus Needle 2 — a 45M-parameter, 2-bit on-device tool-calling model — for Lynx pages on Android and iOS.",
-  "keywords": [
-    "lynx",
-    "napi",
-    "addon",
-    "needle",
-    "tool-calling",
-    "on-device",
-    "llm"
-  ],
-  "license": "MIT",
   "type": "module",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./lib/index.d.ts",
-      "default": "./lib/index.js"
-    }
-  },
-  "files": [
-    "lib"
+  "workspaces": [
+    "packages/lynx-needle"
   ],
-  "engines": {
-    "node": ">=22"
-  },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "prepack": "npm run build",
-    "fetch-engine": "bash tools/fetch-engine.sh",
-    "deps:android": "node scripts/fetch-libs.mjs --platform android --out vendor/android",
-    "deps:harmony": "node scripts/fetch-libs.mjs --platform harmony --out vendor/harmony",
-    "build:android": "bash tools/build-android.sh",
-    "build:ios": "bash tools/build-ios.sh",
-    "build:macos": "cmake -S . -B build/macos -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 && cmake --build build/macos",
-    "package:darwin": "node scripts/package-darwin.mjs"
-  },
-  "devDependencies": {
-    "@lynx-js/weak-node-api": "0.1.0",
-    "typescript": "^5.9.0"
+    "build": "npm --workspace lynx-needle run build",
+    "codegen": "npm --workspace lynx-needle run codegen",
+    "fetch-engine": "npm --workspace lynx-needle run fetch-engine",
+    "deps:android": "npm --workspace lynx-needle run deps:android",
+    "build:android": "npm --workspace lynx-needle run build:android",
+    "build:ios": "npm --workspace lynx-needle run build:ios",
+    "build:macos": "npm --workspace lynx-needle run build:macos",
+    "package:darwin": "npm --workspace lynx-needle run package:darwin",
+    "pack:needle": "npm --workspace lynx-needle pack --dry-run --json --silent"
   }
 }

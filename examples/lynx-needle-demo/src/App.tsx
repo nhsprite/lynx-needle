@@ -241,14 +241,13 @@ export function App() {
           <text className="setup-tag">addon not available</text>
           <text className="setup-text">
             The needle NAPI addon is not loaded. To run this demo:{'\n\n'}
-            1. Build the addon (npm run build:android / build:ios in the addon
-            repo); Android artifacts land in android/src/main/jniLibs directly.
+            1. Build packages/lynx-needle and the platform addon.
             {'\n'}
-            2. Android: use android/ as a Gradle module (see
-            examples/android-host).{'\n'}
-            3. iOS: add pod 'needle' from ios/ (see examples/ios-host).{'\n'}
-            4. The host must embed a Lynx runtime with NAPI binding (Lynx ≥
-            4.3.0 nightly or a source build).
+            2. Android: apply the Lynx library plugins and call
+            LynxAutolinkGenerated.setupGlobal after LynxEnv.init.{'\n'}
+            3. iOS: use cocoapods-lynx-library with a Lynx 4.3 nightly pod.
+            {'\n'}
+            4. The host must embed a Lynx runtime with NAPI binding.
           </text>
         </view>
       </view>
