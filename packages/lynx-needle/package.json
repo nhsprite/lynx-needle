@@ -59,6 +59,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "test": "npm run build && node --test tests/*.test.mjs",
     "build": "npm run codegen && tsc -p tsconfig.json && tsc -p tsconfig.generated.json",
     "codegen": "lynx-autolink-codegen",
     "prepack": "npm run codegen --silent >/dev/null && tsc -p tsconfig.json && tsc -p tsconfig.generated.json && npm run verify:package-artifacts --silent >/dev/null",

@@ -1,0 +1,165 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 22.18.0
+
+jobs:
+  javascript:
+    name: JavaScript and package API
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            examples/lynx-needle-demo/package-lock.json
+
+      - name: Install package dependencies
+        run: npm ci
+
+      - name: Run package unit tests
+        run: npm test
+
+      - name: Build the ReactLynx demo
+        run: |
+          npm ci --prefix examples/lynx-needle-demo
+          npm run build --prefix examples/lynx-needle-demo
+
+      - name: Verify generated sources are current
+        run: git diff --exit-code
+
+  android:
+    name: Android addon and host
+    needs: javascript
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            examples/android-host/package-lock.json
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: >-
+            platform-tools
+            platforms;android-35
+            build-tools;35.0.0
+            cmake;3.18.1
+            ndk;26.1.10909125
+
+      - name: Install package dependencies
+        run: npm ci
+
+      - name: Fetch Android engine archives
+        run: bash packages/lynx-needle/tools/fetch-engine.sh android-arm64 android-armv7
+
+      - name: Build Android addon
+        run: npm run build:android
+
+      - name: Build Android host APK
+        working-directory: examples/android-host
+        run: ./gradlew --no-daemon :app:assembleDebug
+
+  ios:
+    name: iOS addon, package, and host
+    needs: javascript
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            examples/ios-host/package-lock.json
+            examples/lynx-needle-demo/package-lock.json
+
+      - name: Install package dependencies
+        run: npm ci
+
+      - name: Fetch engine archives
+        run: npm run fetch-engine
+
+      - name: Build and package iOS addon
+        run: npm run build:ios
+
+      - name: Validate npm package contents
+        run: npm run pack:needle
+
+      - name: Build bundled ReactLynx template
+        run: |
+          npm ci --prefix examples/lynx-needle-demo
+          npm run build --prefix examples/lynx-needle-demo
+
+      - name: Link addon into iOS host
+        run: npm ci --prefix examples/ios-host
+
+      - name: Set up Ruby and CocoaPods
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: examples/ios-host
+
+      - name: Generate iOS host project
+        working-directory: examples/ios-host
+        run: bundle exec ruby generate-project.rb
+
+      - name: Install iOS host pods
+        working-directory: examples/ios-host
+        run: bundle exec pod install
+
+      - name: Build iOS host for the simulator
+        working-directory: examples/ios-host
+        run: >-
+          xcodebuild
+          -workspace NeedleHost.xcworkspace
+          -scheme NeedleHost
+          -configuration Debug
+          -sdk iphonesimulator
+          -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO
+          build

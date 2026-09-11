@@ -6,6 +6,7 @@
     "packages/lynx-needle"
   ],
   "scripts": {
+    "test": "npm --workspace lynx-needle test",
     "build": "npm --workspace lynx-needle run build",
     "codegen": "npm --workspace lynx-needle run codegen",
     "fetch-engine": "npm --workspace lynx-needle run fetch-engine",
