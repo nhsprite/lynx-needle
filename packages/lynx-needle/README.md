@@ -108,6 +108,14 @@ No per-`LynxView` attach call is needed.
 ### iOS
 
 ```ruby
+# Gemfile
+source 'https://rubygems.org'
+
+gem 'cocoapods', '1.14.3'
+gem 'cocoapods-lynx-library', '4.3.0.pre.nightly.202609090610.180.g5e30c9e6'
+```
+
+```ruby
 # Podfile
 source 'https://github.com/lynx-family/Specs.git'
 source 'https://cdn.cocoapods.org/'
@@ -121,6 +129,9 @@ target 'YourApp' do
   pod 'Lynx', '4.3.0-nightly.202609090610.180.g5e30c9e6'
 end
 ```
+
+Install pods with `bundle install && bundle exec pod install` so the AutoLink
+plugin is resolved from the `Gemfile`.
 
 The CocoaPods plugin reads the npm dependency, adds the `lynx-needle` pod, and
 generates `LynxGeneratedNodeAPIAddonUse.mm`. That registry includes
@@ -240,10 +251,12 @@ npm run build:ios
 # 2. Frontend demo dev server (same as above), or build once for the bundled template
 (cd examples/lynx-needle-demo && npm install && npm run build)
 
-# 3. Host app (requires CocoaPods; generates the Xcode project on first run)
+# 3. Host app (requires Bundler/CocoaPods; generates the Xcode project on first run)
 cd examples/ios-host
-ruby generate-project.rb      # one-time, needs the xcodeproj gem (bundled with CocoaPods)
-pod install
+npm install                   # links node_modules/lynx-needle to packages/lynx-needle
+bundle install
+bundle exec ruby generate-project.rb  # one-time, uses the xcodeproj gem from the bundle
+bundle exec pod install
 open NeedleHost.xcworkspace   # build & run on a device/simulator
 ```
 
@@ -259,6 +272,10 @@ needle engine **2.0.3** and fetched from Hugging Face:
 ```bash
 npm run fetch-engine    # needle.h + libneedle.a for Android/iOS/macOS
 ```
+
+Before publishing, run `npm pack --dry-run --json --silent` from this package.
+The `prepack` hook rebuilds the TypeScript/codegen outputs and fails if the
+required Needle engine archives or iOS xcframework artifacts are missing.
 
 ### Android (arm64-v8a, armeabi-v7a)
 

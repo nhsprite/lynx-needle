@@ -52,7 +52,7 @@ PODS:
 
 DEPENDENCIES:
   - Lynx (= 4.3.0-nightly.202609090610.180.g5e30c9e6)
-  - lynx-needle (from `../../packages/lynx-needle/ios`)
+  - lynx-needle (from `node_modules/lynx-needle/ios`)
   - LynxBase (= 4.3.0-nightly.202609090610.180.g5e30c9e6)
   - LynxLibraryRegistry (from `generated/lynx-library`)
   - LynxServiceAPI (= 4.3.0-nightly.202609090610.180.g5e30c9e6)
@@ -68,15 +68,15 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   lynx-needle:
-    :path: "../../packages/lynx-needle/ios"
+    :path: node_modules/lynx-needle/ios
   LynxLibraryRegistry:
-    :path: "generated/lynx-library"
+    :path: generated/lynx-library
 
 SPEC CHECKSUMS:
   Lynx: 12028ed462227eb5b36ec0ab452c968bcf4f9c10
-  lynx-needle: 278ecf1ea4d639ad004ce3d2641d141bcd90223b
+  lynx-needle: 0821c8d6f4bc313a7dc50e8b63308284e8cf56ce
   LynxBase: dc9ec77ec4518c81350628375eb3a672ff55a6d1
-  LynxLibraryRegistry: d3a7119cee8e0236d54cbd87e6f6cfb583069b7e
+  LynxLibraryRegistry: 710714a54e6c44c65cf486ee524d68b4e63c6338
   LynxServiceAPI: 67a265f0bc77ad68e92a359a7afc35f612c84e66
   LynxWeakNodeAPI: 84963f870fe3dc12e9bd57a729de6a48b23b0d16
   PrimJS: 68292fff5763086940a54ea416a888f1efefb995

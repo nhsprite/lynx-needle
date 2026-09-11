@@ -11,8 +11,10 @@ npm run build:ios             # -> packages/lynx-needle/ios/ artifacts
 (cd examples/lynx-needle-demo && npm install && npm run build)
 
 # here
-ruby generate-project.rb      # one-time; uses the xcodeproj gem (bundled with CocoaPods)
-pod install
+npm install                   # links node_modules/lynx-needle to packages/lynx-needle
+bundle install
+bundle exec ruby generate-project.rb  # one-time; uses the xcodeproj gem from the bundle
+bundle exec pod install
 open NeedleHost.xcworkspace   # build & run on a device or simulator
 ```
 
@@ -38,5 +40,7 @@ development and simulator automation, pass a remote demo bundle URL such as
   '4.3.0-nightly.202609090610.180.g5e30c9e6'` from
   `https://github.com/lynx-family/Specs.git`. That podspec downloads the
   published zip from `artifacts-storage.tos-s3-ap-southeast-1.bytepluses.com`.
+- `Gemfile` pins `cocoapods-lynx-library` so the AutoLink Podfile plugin is
+  installed with Bundler instead of relying on a globally installed gem.
 - `generate-project.rb` only creates the Xcode project once; delete
   `NeedleHost.xcodeproj` to regenerate.

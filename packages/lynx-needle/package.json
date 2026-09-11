@@ -61,7 +61,8 @@
   "scripts": {
     "build": "npm run codegen && tsc -p tsconfig.json && tsc -p tsconfig.generated.json",
     "codegen": "lynx-autolink-codegen",
-    "prepack": "lynx-autolink-codegen >/dev/null && tsc -p tsconfig.json && tsc -p tsconfig.generated.json",
+    "prepack": "npm run codegen --silent >/dev/null && tsc -p tsconfig.json && tsc -p tsconfig.generated.json && npm run verify:package-artifacts --silent >/dev/null",
+    "verify:package-artifacts": "node scripts/verify-package-artifacts.mjs",
     "fetch-engine": "bash tools/fetch-engine.sh",
     "deps:android": "node scripts/fetch-libs.mjs --platform android --out vendor/android",
     "build:android": "bash tools/build-android.sh",
