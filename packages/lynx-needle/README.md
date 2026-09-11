@@ -107,6 +107,9 @@ No per-`LynxView` attach call is needed.
 
 ### iOS
 
+Use Bundler to keep CocoaPods and the AutoLink plugin aligned with the Lynx
+version used by the host:
+
 ```ruby
 # Gemfile
 source 'https://rubygems.org'
@@ -130,8 +133,15 @@ target 'YourApp' do
 end
 ```
 
-Install pods with `bundle install && bundle exec pod install` so the AutoLink
-plugin is resolved from the `Gemfile`.
+Install the npm dependency before running CocoaPods: the AutoLink plugin scans
+the host's `node_modules/lynx-needle/lynx.lib.json` and resolves the local
+podspec from there.
+
+```bash
+npm install
+bundle install
+bundle exec pod install
+```
 
 The CocoaPods plugin reads the npm dependency, adds the `lynx-needle` pod, and
 generates `LynxGeneratedNodeAPIAddonUse.mm`. That registry includes
@@ -245,7 +255,9 @@ page renders but reports "addon not available" — see the prerequisite section.
 ### iOS: `examples/ios-host` × `examples/lynx-needle-demo`
 
 ```bash
-# 1. Repo root in this checkout: build the pod artifacts
+# 1. Repo root in this checkout: install tooling, fetch the engine, and build the pod artifacts
+npm install
+npm run fetch-engine
 npm run build:ios
 
 # 2. Frontend demo dev server (same as above), or build once for the bundled template
@@ -254,8 +266,8 @@ npm run build:ios
 # 3. Host app (requires Bundler/CocoaPods; generates the Xcode project on first run)
 cd examples/ios-host
 npm install                   # links node_modules/lynx-needle to packages/lynx-needle
-bundle install
-bundle exec ruby generate-project.rb  # one-time, uses the xcodeproj gem from the bundle
+bundle install                # installs the pinned CocoaPods and AutoLink plugin
+bundle exec ruby generate-project.rb
 bundle exec pod install
 open NeedleHost.xcworkspace   # build & run on a device/simulator
 ```
@@ -273,9 +285,17 @@ needle engine **2.0.3** and fetched from Hugging Face:
 npm run fetch-engine    # needle.h + libneedle.a for Android/iOS/macOS
 ```
 
-Before publishing, run `npm pack --dry-run --json --silent` from this package.
-The `prepack` hook rebuilds the TypeScript/codegen outputs and fails if the
-required Needle engine archives or iOS xcframework artifacts are missing.
+### Package validation
+
+Before publishing, run the workspace pack check from the repository root:
+
+```bash
+npm run pack:needle
+```
+
+The package's `prepack` hook regenerates the AutoLink/TypeScript outputs and
+fails when a required Needle engine archive or iOS xcframework artifact is
+missing. If it reports missing iOS files, run `npm run build:ios` and retry.
 
 ### Android (arm64-v8a, armeabi-v7a)
 
